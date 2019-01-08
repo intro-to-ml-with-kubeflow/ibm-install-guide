@@ -3,15 +3,14 @@
 
 ## Assumes cluster has been created and is up and running... eventually merge these scripts..
 
-CLUSTER_NAME=kubeflow_tutorial
-ibmcloud cs cluster-config $CLUSTER_NAME
+# ibmcloud cs cluster-config $CLUSTER_NAME
 
 ## need to get this line from prev command.
 # export KUBECONFIG=/home/rawkintrevo/.bluemix/plugins/container-service/clusters/kubeflow-tutorial/kube-config-dal10-kubeflow-tutorial.yml
 
 
-#mkdir kf-tutorial2
-#cd kf-tutorial2
+#mkdir kf-tutorial
+#cd kf-tutorial
 #git init
 #git remote add origin -f https://github.com/kubeflow/examples
 #echo mnist >> .git/info/sparse-checkout
@@ -19,10 +18,8 @@ ibmcloud cs cluster-config $CLUSTER_NAME
 
 # ^^ just want to checkout the MNIST example, but whatever.
 
-
-# upload data director to s3 bucket...
 # but for now, do that manually and then
-cd kf-tutorial2/mnist
+cd kf-tutorial/mnist
 
 APP_NAME=my-kubeflow
 NAMESPACE=tfworkflow
@@ -57,14 +54,9 @@ DOCKER_BASE_URL=registry.ng.bluemix.net/$NAMESPACE # Put your docker registry he
 #
 #docker push ${DOCKER_BASE_URL}/mytfmodel:1.7
 
-
-
-
 ## Create S3 Creds
 export S3_ENDPOINT=s3-api.us-geo.objectstorage.softlayer.net  #replace with your s3 endpoint in a host:port format, e.g. minio:9000
 export AWS_ENDPOINT_URL=https://${S3_ENDPOINT} #use http instead of https for default minio installs
-export AWS_ACCESS_KEY_ID=19fe9d4ea1a848dfaf47f57a878df453
-export AWS_SECRET_ACCESS_KEY=d25ee5b7d38f9f9b9f92ffa327efdc9fadf92d2cbd3d2f9b
 export AWS_REGION=us-geo
 export BUCKET_NAME=mnist-bucket-tutorial
 export S3_USE_HTTPS=1 #set to 0 for default minio installs
@@ -85,6 +77,17 @@ export MODEL_TRAIN_STEPS=2
 export MODEL_BATCH_SIZE=1
 
 ## Upload mnist/data to S3_DATA_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/0.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/1.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/2.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/3.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/4.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/5.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/6.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/7.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/8.png $S3_TRAIN_BASE_URL
+aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/9.png $S3_TRAIN_BASE_URL
+
 
 ## Submit the Job
 
