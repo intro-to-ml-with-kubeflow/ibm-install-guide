@@ -36,7 +36,6 @@ ibmcloud login
 
 Run the script to create a small cluster.
 ```bash
-export CLUSTER_NAME=kubeflow_tutorial
 ./create-k8s-cluster.sh
 ```
 
@@ -45,30 +44,22 @@ Wait 10 minutes or so for that to spin up...
 #### Step4: Install Kube and load the model
 
 
-Run this:
-
-```bash
-ibmcloud cs cluster-config $CLUSTER_NAME
-```
-
-It will give you a line to export- do that. 
-
-The following _should_ just check out the MNIST example, but it pulls everything /shrug
-
-```bash
-mkdir kf-tutorial
-cd kf-tutorial
-git init
-git remote add origin -f https://github.com/kubeflow/examples
-echo mnist >> .git/info/sparse-checkout
-git pull origin master
-```
-
-Set AWS ENV Variables
+##### Set AWS ENV Variables 
 ```bash
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
+
+OR create file called `set-aws-creds.sh` that looks like this
+```bash
+#!/usr/bin/env bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+```
+
+^^ `once-cluster-is-up.sh` will look for that file and run it if it exists.
+
+
 
 Now build the docker image.
 ```bash
@@ -79,7 +70,7 @@ docker push ${DOCKER_BASE_URL}/mytfmodel:1.7
 
 Now run the script and cross your fingers:
 ```bash
-./once-cluster-is-up.sh
+source ./once-cluster-is-up.sh
 ```
 
 

@@ -3,20 +3,34 @@
 
 ## Assumes cluster has been created and is up and running... eventually merge these scripts..
 
-# ibmcloud cs cluster-config $CLUSTER_NAME
+if [ -z "$CLUSTER_NAME" ]; then
+    echo "CLUSTER_NAME not set, we're gonna call this one 'kubeflow_tutorial'"
+    export CLUSTER_NAME=kubeflow_tutorial
+fi
 
-## need to get this line from prev command.
-# export KUBECONFIG=/home/rawkintrevo/.bluemix/plugins/container-service/clusters/kubeflow-tutorial/kube-config-dal10-kubeflow-tutorial.yml
+
+export KUBECONFIG=$(ibmcloud cs cluster-config $CLUSTER_NAME | sed -n 's/.*KUBECONFIG=//p')
+
+if [ -f ./set-aws-creds.sh ]; then
+		echo "Found 'set-aws-creds.sh' , loading creds from there"
+    source ./set-aws-creds.sh
+fi
+
+## Need better check on wheather that is working or not
+"${AWS_ACCESS_KEY_ID:?Need to set AWS_ACCESS_KEY_ID non-empty}"
+"${AWS_SECRET_ACCESS_KEY:?Need to set AWS_SECRET_ACCESS_KEY non-empty}"
 
 
-#mkdir kf-tutorial
-#cd kf-tutorial
-#git init
-#git remote add origin -f https://github.com/kubeflow/examples
-#echo mnist >> .git/info/sparse-checkout
-#git pull origin master
-
-# ^^ just want to checkout the MNIST example, but whatever.
+if [! -d "kf-tutorial" ]; then
+	echo "Cloning MNIST Example"
+	mkdir kf-tutorial
+	cd kf-tutorial
+	git init
+	git remote add origin -f https://github.com/kubeflow/examples
+	echo mnist >> .git/info/sparse-checkout
+	git pull origin master
+	echo "Example source code cloned"
+fi
 
 # but for now, do that manually and then
 cd kf-tutorial/mnist
@@ -24,7 +38,11 @@ cd kf-tutorial/mnist
 APP_NAME=my-kubeflow
 NAMESPACE=tfworkflow
 # if directory exists, delete it.
-# rm $APP_NAME -rf
+if [ -d "$APP_NAME" ]; then
+	echo "Deleting $APP_NAME"
+	rm $APP_NAME -rf
+fi
+
 kubectl create namespace ${NAMESPACE}
 ibmcloud cr namespace-add $NAMESPACE
 ks init ${APP_NAME}
