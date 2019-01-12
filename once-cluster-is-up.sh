@@ -43,6 +43,7 @@ if [ -d "$APP_NAME" ]; then
 	rm $APP_NAME -rf
 fi
 
+#tag::startProject[]
 kubectl create namespace ${NAMESPACE}
 ibmcloud cr namespace-add $NAMESPACE
 ks init ${APP_NAME}
@@ -60,6 +61,7 @@ ks apply default -c kubeflow-argo
 
 # Switch context for the rest of the example
 kubectl config set-context $(kubectl config current-context) --namespace=${NAMESPACE}
+#end::startProject[]
 
 cd -
 
@@ -67,12 +69,15 @@ cd -
 kubectl apply -f tf-user.yaml
 
 ### If this hasn't been done yet...
+#tag::configureDockerRegistry[]
 DOCKER_BASE_URL=registry.ng.bluemix.net/$NAMESPACE # Put your docker registry here
+#end::configureDockerRegistry[]
 #docker build . --no-cache  -f Dockerfile.model -t ${DOCKER_BASE_URL}/mytfmodel:1.7
 #
 #docker push ${DOCKER_BASE_URL}/mytfmodel:1.7
 
 ## Create S3 Creds
+#tag::configureStorage[]
 export S3_ENDPOINT=s3-api.us-geo.objectstorage.softlayer.net  #replace with your s3 endpoint in a host:port format, e.g. minio:9000
 export AWS_ENDPOINT_URL=https://${S3_ENDPOINT} #use http instead of https for default minio installs
 export AWS_REGION=us-geo
@@ -93,6 +98,7 @@ export TF_MODEL_IMAGE=${DOCKER_BASE_URL}/mytfmodel:1.7
 export TF_WORKER=3
 export MODEL_TRAIN_STEPS=2
 export MODEL_BATCH_SIZE=1
+#end::configureStorage[]
 
 ## Upload mnist/data to S3_DATA_URL
 aws --endpoint-url $AWS_ENDPOINT_URL s3 cp data/0.png $S3_TRAIN_BASE_URL

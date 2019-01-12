@@ -28,18 +28,22 @@ K8S_VERSION=1.10.11
 
 VLAN_LIST=$(ibmcloud ks vlans $ZONE | tail -1)
 if [[ $VLAN_LIST == ID* ]]; then
-	echo "Creating Cluster and VLANs"
-	ibmcloud ks cluster-create --zone $ZONE \
-    --machine-type $MACHINE_TYPE \
-    --workers 3 --name $CLUSTER_NAME --kube-version $K8S_VERSION
+  echo "Creating Cluster and VLANs"
+  #tag::createClusterAndVLANS[]
+  ibmcloud ks cluster-create --zone $ZONE \
+	   --machine-type $MACHINE_TYPE \
+	   --workers 3 --name $CLUSTER_NAME --kube-version $K8S_VERSION
+  #end::createClusterAndVLANS[]
 else
-	echo "VLANs exist, creating cluster"
-	PRIV_VLAN_ID=$(ibmcloud ks vlans $ZONE | sed -n 's/private.*//p' | cut -d' ' -f1)
-	PUB_VLAN_ID=$(ibmcloud ks vlans $ZONE | sed -n 's/public.*//p' | cut -d' ' -f1)
-	ibmcloud ks cluster-create --zone $ZONE \
-    --machine-type $MACHINE_TYPE \
-    --workers 3 --name $CLUSTER_NAME --kube-version $K8S_VERSION \
-		--public-vlan $PUB_VLAN_ID --private-vlan $PRIV_VLAN_ID
+  echo "VLANs exist, creating cluster"
+  #tag::createClusterInVLAN[]
+  PRIV_VLAN_ID=$(ibmcloud ks vlans $ZONE | sed -n 's/private.*//p' | cut -d' ' -f1)
+  PUB_VLAN_ID=$(ibmcloud ks vlans $ZONE | sed -n 's/public.*//p' | cut -d' ' -f1)
+  ibmcloud ks cluster-create --zone $ZONE \
+	   --machine-type $MACHINE_TYPE \
+	   --workers 3 --name $CLUSTER_NAME --kube-version $K8S_VERSION \
+	   --public-vlan $PUB_VLAN_ID --private-vlan $PRIV_VLAN_ID
+  #end::createClusterInVLAN[]
 fi
 
 echo "Check Cluster exists in Web GUI for now... give it 10 then run next script"
