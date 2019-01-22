@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 if [ -z "$CLUSTER_NAME" ]; then
-    echo "CLUSTER_NAME not set, we're gonna call this one 'kubeflow_tutorial'"
-    export CLUSTER_NAME=kubeflow_tutorial
+    export CLUSTER_NAME=kubeflow-tutorial2
+    echo "CLUSTER_NAME not set, we're gonna call this one ${CLUSTER_NAME}"
+else
+	echo "Detected CLUSTER_NAME=${CLUSTER_NAME}"
 fi
 
 if [ -z "$MACHINE_TYPE" ]; then
@@ -47,3 +49,4 @@ else
 fi
 
 echo "Check Cluster exists in Web GUI for now... give it 10 then run next script"
+# Todo programatically check cluster status
