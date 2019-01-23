@@ -50,3 +50,4 @@ fi
 
 echo "Check Cluster exists in Web GUI for now... give it 10 then run next script"
 # Todo programatically check cluster status
+
