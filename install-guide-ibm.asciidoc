@@ -25,6 +25,56 @@ the CLI tools.
 
 == Creating a Kubernetes Cluster in IBM Cloud
 
+For this entire tutorial, there is an "easy" way which will get Kubeflow up and running on IBMCloud with minimal effort
+and understanding, and a "long way" that explains what the scripts are doing, and hopefully will be instructive in
+helping the user understand what, how, and why the script is doing the things that it is doing. The user is encouraged to
+use the easy way for assistance but to read through and understand the instructive way as needed.
+
+==== Easy Way
+
+The easy way is to clone the tutorial repo, login to IBMCloud, and run the `create-k8s-cluster.sh` script. This can be
+acheived in the following three lines of code (though login is interactive and may be slightly different depending on
+the security on your account).
+
+```bash
+ibmcloud login
+git clone https://github.com/intro-to-ml-with-kubeflow/ibm-install-guide
+cd ;ibm-install-guide/create-k8s-cluster.sh
+```
+
+That will fire off a series of commands that will setup a small Kubernetes cluster on IBMCloud.  It takes about ten
+minutes to set up a cluster, so now let's go through all of the lines in the script and see what it is doing.
+
+
+==== Instructive Way
+
+The first thing to do when setting up your Kubernetes cluster will be to name it.  This can be anything. The default name
+for this tutorial is `kubeflow-tutorial`.  Next you will select a *zone* in which to create your cluster.  You can see a
+full list of available zones with the command `ibmcloud ks zones`.  The script simply chooses the last zone in the list.
+Next we will set the version of Kubernetes we want to run.  We have chosen `1.10.11` as it is the latest stable version
+available on IBMCloud at the time of writing. Next you will need to choose  your machine types.  To see a full list of
+available machines you can run `ibmcloud ks machine-types $ZONE` (replace `$ZONE` with your zone).  For the tutorial however,
+we are going to use the smallest cheapest machines `u2c.2x4`.
+
+include::create-k8s-cluster.sh[tag=setClusterName]
+include::create-k8s-cluster.sh[tag=setZoneAndV]
+include::create-k8s-cluster.sh[tag=setMachineType]
+
+Next you may need to create new VLANs.  If you have already set up a Kubernetes cluster in this zone however, you won't
+need to create them.  To find out if VLANs exist in the zone run `ibmcloud ks vlans $ZONE`. If that command returns an
+empty list, then you can create the cluster (and the VLANs automatically), with the following command:
+
+include::create-k8s-cluster.sh[tag=createClusterAndVLANS]
+
+WARNING: If you already have VLANs the previous command will throw an error- please use following command instead.
+
+If you already have VLANs you will need to explicitly set the public and private VLAN by their ID.  The shell script
+looks at the output of `ibmcloud ks vlans $ZONE` and parses out the first *public* and *private* VLAN's ID.  You could
+easily do this by just writing down the ID of a VLAN you wish to explicitly use.
+
+include::create-k8s-cluster.sh[tag=createClusterInVLAN]
+
+
 
 == Creating a Bucket in IBM Object Store
 
@@ -80,10 +130,55 @@ Finally scroll down and click "Create Bucket".
 [caption="Step 5: "]
 image::bucket-settings.png[Dash,600,200]
 
+Note the tabs on the left, and click on "Service Credentials".  You will see a blue box on the right that says "New credential".
+ Click on that box.
+
+.Create New Credentials
+[#img-dash]
+[caption="Step 6: "]
+image::create-cred.png[Dash,600,200]
+
+A dialog will pop up. You can leave everything as defaults, however you must add `{"HMAC":true}` into the *Add Inline
+Configuration Parameters* box.  Adding this parameter causes the service credential to create `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_KEY_ID`.
+
+After you've created the credentials, you should see them populate in the list in the *Service credentials* page.  Click
+on *View credentials* to expose a JSON of the credentials.  In a key called `cos_hmac_keys` you will see `access_key_id`
+and `secret_access_key`.  In the directory where you have cloned the tutorial repo, create a file called `set-aws-creds.sh`
+and fill it out as follows:
+
+```bash
+#!/usr/bin/env bash
+export AWS_ACCESS_KEY_ID=<access_key_id>
+export AWS_SECRET_ACCESS_KEY=<secret_access_key>
+```
+
+Where obviously, you replace `<access_key_id>` and `<secret_access_key>` with the values from the json. Finally at the
+command prompt make the bash script executable with
+
+```bash
+chmod +x ./set-aws-creds.sh
+```
+
+That's it! You've created an S3 bucket on IBMCloud!
 
 
 == Installing Kubeflow
 
+Once the cluster is setup (you can check progress in the IBMCloud Web GUI), you have created a bucket, and entered your
+credentials into `set-aws-creds.sh`, you are ready to download the MNIST example, install Kubeflow, and submit the MNIST
+job for training.
+
+
+==== Easy Way
+
+The "easy way" to do everything mentioned above is to run the script `once-cluster-is-up.sh`.  This will take care of
+everything and even train and serve the model!
+
+
+==== Instructive Way
+
+Running a one-liner at the shell is not a good way to learn.
 
 == Train a Simple Tensorflow Model
 

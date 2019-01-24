@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 
+
+## Use the last one as the Zone
+#tag::setZoneAndV[]
+ZONE=$(ibmcloud ks zones | tail -1)
+K8S_VERSION=1.10.11
+#end::setZoneAndV[]
+
+echo "Zone set: $ZONE"
+
 if [ -z "$CLUSTER_NAME" ]; then
-    export CLUSTER_NAME=kubeflow-tutorial2
+		#tag::setClusterName[]
+    export CLUSTER_NAME=kubeflow-tutorial
+    #end::setClusterName[]
     echo "CLUSTER_NAME not set, we're gonna call this one ${CLUSTER_NAME}"
 else
 	echo "Detected CLUSTER_NAME=${CLUSTER_NAME}"
 fi
 
 if [ -z "$MACHINE_TYPE" ]; then
-		echo "MACHINE_TYPE not set, we're gonna use the cheap-os aka 'u2c.2x4'.  Please run 'ibmcloud ks machine-types $ZONE' to see all available machines"
-		MACHINE_TYPE=u2c.2x4
+	echo "MACHINE_TYPE not set, we're gonna use the cheap-os aka 'u2c.2x4'.  Please run 'ibmcloud ks machine-types $ZONE' to see all available machines"
+	#tag::setMachineType[]
+	MACHINE_TYPE=u2c.2x4
+	#end::setMachineType[]
 fi
 # assumes you are logged in
 # ibmcloud login
@@ -17,18 +30,16 @@ fi
 # assumes you have already targeted the resource group you want
 # ibmcloud target -g <resource_group_name>
 
-## Use the last one as the Zone
-ZONE=$(ibmcloud ks zones | tail -1)
 
-echo "Zone set: $ZONE"
 
 ## Get output from this and set PRIV_VLAN and PUB_VLAN
 ## NOTE: ON first run, these won't exist, and in that case exclude last line of ibmcloud ks cluster-create ...
 
-ZONE=$(ibmcloud ks zones | tail -1)
-K8S_VERSION=1.10.11
+
+
 
 VLAN_LIST=$(ibmcloud ks vlans $ZONE | tail -1)
+
 if [[ $VLAN_LIST == ID* ]]; then
   echo "Creating Cluster and VLANs"
   #tag::createClusterAndVLANS[]
